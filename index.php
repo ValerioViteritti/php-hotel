@@ -1,8 +1,6 @@
 <?php 
-
-
+// array degli hotel fornito
 $hotels = [
-
     [
         'name' => 'Hotel Belvedere',
         'description' => 'Hotel Belvedere Descrizione',
@@ -38,18 +36,37 @@ $hotels = [
         'vote' => 2,
         'distance_to_center' => 50
     ],
-
 ];
-
+// copia dell'array originale da filtrare
 $filtro_hotels = $hotels;
 
+// filtro per parcheggio
 if (isset($_GET['parking'])) {
+    // filtra solo gli hotel col parcheggio
+    // array_filter è una funzione PHP che filtra gli elementi di un array utilizzando una funzione di callback. Restituisce un nuovo array contenente solo gli elementi per i quali la funzione di callback restituisce true.
     $filtro_hotels = array_filter($filtro_hotels, function($hotel){
         return $hotel['parking'];
     });
 }
 
-// var_dump($hotels[0])
+// filtro per voti
+// variabile per tenere traccia del voto selezionato
+$selected_rate = null;
+for ($i = 1; $i <= 5; $i++) {
+    if (isset($_GET["rate$i"])) {
+        // imposta il valore selezionato
+        $selected_rate = $i;
+        // uscita dal ciclo una volta trovato
+        break;
+    }
+}
+
+if (!is_null($selected_rate)) {
+    // filtra gli hotel con voto uguale o superiore a quello selezionato
+    $filtro_hotels = array_filter($filtro_hotels, function($hotel) use ($selected_rate) {
+        return $hotel['vote'] >= $selected_rate;
+    });
+}
 
 ?>
 
@@ -64,7 +81,7 @@ if (isset($_GET['parking'])) {
             content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
 
-        <!-- Bootstrap CSS v5.2.1 -->
+        <!-- Bootstrap CSS v5.3.2 -->
         <link
             href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
             rel="stylesheet"
@@ -75,54 +92,44 @@ if (isset($_GET['parking'])) {
 
     <body>
         <div class="container my-5">
+            <!-- form per il filtraggio -->
             <form action="index.php" method="get">
                 <div>
                     <input type="checkbox" name="parking" id="parking" <?php echo isset($_GET['parking']) ? 'checked' : ''; ?>>
                     <label for="parking">Con il parcheggio</label>    
                 </div>
-                <div>
-                    <input type="checkbox" name="rate1" >1
-
-                </div>
+                <?php for ($i = 1; $i <= 5; $i++): ?>
+                    <div>
+                        <input type="checkbox" name="rate<?php echo $i; ?>" id="rate<?php echo $i; ?>" value="<?php echo $i; ?>" <?php echo (isset($_GET["rate$i"]) && $_GET["rate$i"] == $i) ? 'checked' : '' ?>>
+                        <label for="rate<?php echo $i; ?>"><?php echo $i; ?></label>
+                    </div>
+                <?php endfor; ?>
                 
+                <button type="submit" class="btn btn-primary">Filtra</button>
+                <button class="btn btn-dark"><a class="text-white bg-dark" href="index.php">Azzera filtri</a></button>
                 
-                <input type="checkbox" name="rate2" >2
-                <input type="checkbox" name="rate3" >3
-                <input type="checkbox" name="rate4" >4
-                <input type="checkbox" name="rate5" >5
-                <button class="btn btn-primary">Filtra</button>
-
             </form>
-        <table class="table">
-            <thead>
-            <tr>
-                <?php foreach ($hotels[0] as $title => $value): ?>
-                <th> <?php echo ucfirst($title) ?> </th>
-                <?php endforeach; ?>
-            </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($filtro_hotels as $hotel):?>
+
+            <table class="table mt-4">
+                <thead>
                     <tr>
-                        
-                        <td> <?php echo $hotel['name'] ?> </td>
-                        <td> <?php echo $hotel['description'] ?> </td>
-                        <td class="text-center"> <?php echo $hotel['parking']? 'SI' : 'NO' ?> </td>
-                        <td class="text-center"> <?php echo $hotel['vote'] ?> </td>
-                        <td class="text-center"> <?php echo $hotel['distance_to_center'] . ' ' . 'km' ?> </td>
-                        
-
+                        <?php foreach ($hotels[0] as $title => $value): ?>
+                            <th> <?php echo ucfirst($title) ?> </th>
+                        <?php endforeach; ?>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-            
-            
-        </table>
-
-
+                </thead>
+                <tbody>
+                    <?php foreach ($filtro_hotels as $hotel): ?>
+                        <tr>
+                            <td> <?php echo $hotel['name'] ?> </td>
+                            <td> <?php echo $hotel['description'] ?> </td>
+                            <td class="text-center"> <?php echo $hotel['parking'] ? 'SI' : 'NO' ?> </td>
+                            <td class="text-center"> <?php echo $hotel['vote'] ?> </td>
+                            <td class="text-center"> <?php echo $hotel['distance_to_center'] . ' km' ?> </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
-
-
-        
     </body>
 </html>
