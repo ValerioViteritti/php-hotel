@@ -41,6 +41,14 @@ $hotels = [
 
 ];
 
+$filtro_hotels = $hotels;
+
+if (isset($_GET['parking'])) {
+    $filtro_hotels = array_filter($filtro_hotels, function($hotel){
+        return $hotel['parking'];
+    });
+}
+
 // var_dump($hotels[0])
 
 ?>
@@ -68,12 +76,20 @@ $hotels = [
     <body>
         <div class="container my-5">
             <form action="index.php" method="get">
-                <input type="radio" name="parking" >Con il parcheggio
-                <input type="radio" name="rate1" >1
-                <input type="radio" name="rate2" >2
-                <input type="radio" name="rate3" >3
-                <input type="radio" name="rate4" >4
-                <input type="radio" name="rate5" >5
+                <div>
+                    <input type="checkbox" name="parking" id="parking" <?php echo isset($_GET['parking']) ? 'checked' : ''; ?>>
+                    <label for="parking">Con il parcheggio</label>    
+                </div>
+                <div>
+                    <input type="checkbox" name="rate1" >1
+
+                </div>
+                
+                
+                <input type="checkbox" name="rate2" >2
+                <input type="checkbox" name="rate3" >3
+                <input type="checkbox" name="rate4" >4
+                <input type="checkbox" name="rate5" >5
                 <button class="btn btn-primary">Filtra</button>
 
             </form>
@@ -86,7 +102,7 @@ $hotels = [
             </tr>
             </thead>
             <tbody>
-                <?php foreach ($hotels as $hotel):?>
+                <?php foreach ($filtro_hotels as $hotel):?>
                     <tr>
                         
                         <td> <?php echo $hotel['name'] ?> </td>
